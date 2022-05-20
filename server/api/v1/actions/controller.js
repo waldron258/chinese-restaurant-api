@@ -26,19 +26,21 @@ exports.create = async (req, res, next) => {
 exports.retrieve = async (req, res, next) => {
   const { query } = req;
 
-  let document;
-
-  if (Object.keys(query).includes("name")) {
-    document = { name: query.name };
-  } else if (Object.keys(query).includes("id")) {
-    document = { _id: new ObjectID(query.id) };
-  } else if (Object.keys(query).length === 0) {
-    document = null;
-  } else if (Object.keys(query).length > 0) {
-    document = undefined;
-  }
-
   try {
+    let document;
+    if (Object.keys(query).includes("name")) {
+      document = { name: query.name };
+    } else if (Object.keys(query).includes("id")) {
+      if (query.id.length === 24) {
+        document = { _id: new ObjectID(query.id) };
+      } else {
+        document = { id: query.id };
+      }
+    } else if (Object.keys(query).length === 0) {
+      document = null;
+    } else if (Object.keys(query).length > 0) {
+      document = undefined;
+    }
     if (document !== undefined) {
       var doc = await find(document);
       res.status(201);
@@ -57,7 +59,7 @@ exports.retrieve = async (req, res, next) => {
       res.status(400);
       res.json({
         success: false,
-        message: "Params not allowed!",
+        message: "Data not allowed!",
       });
     }
   } catch (error) {
